@@ -94,6 +94,42 @@
     white-space: nowrap;
   }
 
+  /* ── Scroll hint (post-loader) ── */
+  #scroll-hint {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  #scroll-hint.show { opacity: 1; }
+  #scroll-hint.hide { opacity: 0; }
+  .hint-text {
+    font-size: 0.6rem;
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .hint-arrow {
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+    animation: hint-drop 1.6s ease-in-out infinite;
+  }
+  @keyframes hint-drop {
+    0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+    40%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+    100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+  }
+
   /* ── Progress bar ── */
   #progress {
     position: fixed;
@@ -315,6 +351,12 @@
 <!-- Progress bar -->
 <div id="progress"></div>
 
+<!-- Scroll hint -->
+<div id="scroll-hint">
+  <div class="hint-text">Scroll</div>
+  <div class="hint-arrow"></div>
+</div>
+
 <!-- Logo -->
 <a href="#" id="logo">Vobius Labs</a>
 
@@ -422,11 +464,35 @@
   let ticking       = false;
   let loaderDone    = false;
 
+  let videoUnlocked = false;
+
+  function unlockVideo() {
+    if (videoUnlocked) return;
+    videoUnlocked = true;
+    // iOS requires a play() call from user gesture context before seeking works
+    const p = video.play();
+    if (p && p.then) {
+      p.then(() => {
+        video.pause();
+        videoReady = true;
+        update();
+      }).catch(() => {});
+    }
+  }
+
+  const scrollHint = document.getElementById('scroll-hint');
+
   function dismissLoader() {
     if (loaderDone) return;
     loaderDone = true;
     loaderFill.style.width = '100%';
-    setTimeout(() => loader.classList.add('hidden'), 350);
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      unlockVideo();
+      // Show scroll hint briefly
+      scrollHint.classList.add('show');
+      setTimeout(() => scrollHint.classList.remove('show'), 4000);
+    }, 350);
   }
 
   // ── Init ────────────────────────────────────────────────────────────────────
@@ -472,6 +538,12 @@
       video.pause();
     }
 
+    // Unlock video on first user interaction (critical for iOS)
+    ['touchstart', 'touchend', 'mousedown', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, unlockVideo, { once: true, passive: true });
+    });
+
+    window.addEventListener('scroll', () => scrollHint.classList.remove('show'), { once: true, passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', update, { passive: true });
     requestAnimationFrame(update);
