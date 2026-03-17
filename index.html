@@ -24,6 +24,76 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /* ── Loading screen ── */
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .loader-wordmark {
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+    animation: loader-breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes loader-breathe {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1;   }
+  }
+  .loader-bar-wrap {
+    width: min(280px, 70vw);
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .loader-bar-fill {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.75);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  /* scanning line behind fill */
+  .loader-bar-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 40px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    animation: loader-scan 1.8s ease-in-out infinite;
+  }
+  @keyframes loader-scan {
+    from { left: -40px; }
+    to   { left: 100%;  }
+  }
+  .loader-sub {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    white-space: nowrap;
+  }
+
   /* ── Progress bar ── */
   #progress {
     position: fixed;
@@ -233,6 +303,15 @@
 </head>
 <body>
 
+<!-- Loading screen -->
+<div id="loader">
+  <div class="loader-wordmark">Vobius Labs</div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar-fill" id="loaderFill"></div>
+  </div>
+  <span class="loader-sub">Loading experience</span>
+</div>
+
 <!-- Progress bar -->
 <div id="progress"></div>
 
@@ -335,14 +414,39 @@
   const spacer      = document.getElementById('scroll-spacer');
   const progress    = document.getElementById('progress');
   const scenes      = document.querySelectorAll('.scene');
+  const loader      = document.getElementById('loader');
+  const loaderFill  = document.getElementById('loaderFill');
 
   const SCROLL_VH   = 600;
   let videoReady    = false;
   let ticking       = false;
+  let loaderDone    = false;
+
+  function dismissLoader() {
+    if (loaderDone) return;
+    loaderDone = true;
+    loaderFill.style.width = '100%';
+    setTimeout(() => loader.classList.add('hidden'), 350);
+  }
 
   // ── Init ────────────────────────────────────────────────────────────────────
   function init() {
     spacer.style.height = `${SCROLL_VH}vh`;
+
+    // Buffer progress → fill loader bar
+    video.addEventListener('progress', () => {
+      if (!video.duration || loaderDone) return;
+      try {
+        const buf = video.buffered;
+        if (buf.length > 0) {
+          const pct = Math.min(buf.end(buf.length - 1) / video.duration, 1);
+          loaderFill.style.width = `${pct * 100}%`;
+          if (pct >= 0.5) dismissLoader(); // dismiss once 50% buffered
+        }
+      } catch (_) {}
+    });
+
+    video.addEventListener('canplaythrough', dismissLoader);
 
     video.addEventListener('loadedmetadata', () => {
       videoReady = true;
@@ -353,9 +457,17 @@
 
     video.addEventListener('error', () => {
       document.getElementById('video-wrap').style.background = '#000';
+      dismissLoader(); // show page even if video fails
     });
 
-    if (video.readyState >= 1) {
+    // Fallback: dismiss loader after 5s no matter what
+    setTimeout(dismissLoader, 5000);
+
+    if (video.readyState >= 4) {
+      videoReady = true;
+      video.pause();
+      dismissLoader();
+    } else if (video.readyState >= 1) {
       videoReady = true;
       video.pause();
     }
