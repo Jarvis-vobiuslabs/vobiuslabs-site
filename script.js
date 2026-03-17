@@ -6,6 +6,7 @@
   'use strict';
 
   const video = document.getElementById('scrollVideo');
+  const videoContainer = document.getElementById('videoContainer');
   const scrollSpacer = document.getElementById('scrollSpacer');
   const progressFill = document.getElementById('progressFill');
   const contentBlocks = document.querySelectorAll('.content-block');
@@ -22,6 +23,10 @@
   function init() {
     // Set scroll spacer height
     scrollSpacer.style.height = `${SCROLL_MULTIPLIER}vh`;
+
+    // Video error handler - fallback to gradient background
+    video.addEventListener('error', onVideoError);
+    video.querySelector('source').addEventListener('error', onVideoError);
 
     // Wait for video metadata
     video.addEventListener('loadedmetadata', onVideoReady);
@@ -44,8 +49,17 @@
     // Ensure video is paused - we control playback via scroll
     video.pause();
     // Force first frame
-    video.currentTime = 0;
+    try {
+      video.currentTime = 0;
+    } catch (e) {
+      // iOS Safari may throw on early seek
+    }
     update();
+  }
+
+  function onVideoError() {
+    videoReady = false;
+    videoContainer.classList.add('video-fallback');
   }
 
   // ---- Scroll Handler ----
@@ -72,7 +86,11 @@
 
       // Only seek if we've moved enough (reduces jank)
       if (Math.abs(video.currentTime - targetTime) > 0.01) {
-        video.currentTime = targetTime;
+        try {
+          video.currentTime = targetTime;
+        } catch (e) {
+          // iOS Safari may throw on currentTime seek
+        }
       }
     }
 
@@ -117,13 +135,7 @@
         // Subtle parallax on the inner content
         const innerProgress = (progress - start) / range;
         const translateY = (1 - innerProgress) * 30 - 15; // -15 to +15px
-        block.querySelector('.content-inner').style.transform =
-          block.querySelector('.content-inner').style.transform
-            ? block.querySelector('.content-inner').style.transform.replace(
-                /translateY\([^)]*\)/,
-                `translateY(${translateY}px)`
-              )
-            : `translateY(${translateY}px)`;
+        block.querySelector('.content-inner').style.transform = `translateY(${translateY}px)`;
       } else {
         block.classList.remove('visible');
         block.style.opacity = 0;

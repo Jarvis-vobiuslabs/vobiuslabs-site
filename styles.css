@@ -122,6 +122,14 @@ body {
   pointer-events: none;
 }
 
+.video-container.video-fallback {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 40%, #16213e 70%, #0a0a0a 100%);
+}
+
+.video-container.video-fallback video {
+  display: none;
+}
+
 /* ---- Scroll Spacer ---- */
 .scroll-spacer {
   position: relative;
