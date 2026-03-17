@@ -2,449 +2,514 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Vobius Labs — We build digital products that matter</title>
-<meta name="description" content="Vobius Labs is a software company that builds digital products, apps, and web experiences.">
+<title>Vobius Labs — Software that moves fast</title>
+<meta name="description" content="Vobius Labs builds iOS apps, web platforms, and digital experiences for businesses that want to move fast and look great.">
+<meta property="og:title" content="Vobius Labs">
+<meta property="og:description" content="We build digital products that matter.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vobiuslabs.com">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='Inter,sans-serif' font-size='18' font-weight='600' fill='%23fff'>V</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html {
-    background: #000;
-    height: 100%;
-  }
-  body {
-    background: #000;
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
+html { background: #000; }
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  cursor: none; /* hide default cursor — we use custom */
+}
+@media (pointer: coarse) { body { cursor: auto; } } /* restore on touch */
 
-  /* ── Loading screen ── */
-  #loader {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: #000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3rem;
-    transition: opacity 0.8s ease, visibility 0.8s ease;
-  }
-  #loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .loader-wordmark {
-    font-size: 0.75rem;
-    font-weight: 400;
-    letter-spacing: 0.45em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.9);
-    animation: loader-breathe 2.4s ease-in-out infinite;
-  }
-  @keyframes loader-breathe {
-    0%, 100% { opacity: 0.4; }
-    50%       { opacity: 1;   }
-  }
-  .loader-bar-wrap {
-    width: min(280px, 70vw);
-    height: 1px;
-    background: rgba(255,255,255,0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  .loader-bar-fill {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.75);
-    width: 0%;
-    transition: width 0.3s ease;
-  }
-  /* scanning line behind fill */
-  .loader-bar-wrap::after {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 40px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-    animation: loader-scan 1.8s ease-in-out infinite;
-  }
-  @keyframes loader-scan {
-    from { left: -40px; }
-    to   { left: 100%;  }
-  }
-  .loader-sub {
-    position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.62rem;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
-    white-space: nowrap;
-  }
+/* ─── Custom cursor (desktop only) ───────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+  z-index: 500;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease;
+  will-change: transform;
+}
+#cursor.big { width: 40px; height: 40px; }
+#cursor.hidden { opacity: 0; }
+@media (pointer: coarse) { #cursor { display: none; } }
 
-  /* ── Scroll hint (post-loader) ── */
-  #scroll-hint {
-    position: fixed;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    opacity: 0;
-    transition: opacity 1s ease;
-    pointer-events: none;
-  }
-  #scroll-hint.show { opacity: 1; }
-  #scroll-hint.hide { opacity: 0; }
-  .hint-text {
-    font-size: 0.6rem;
-    font-weight: 300;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-  }
-  .hint-arrow {
-    width: 1px;
-    height: 28px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
-    animation: hint-drop 1.6s ease-in-out infinite;
-  }
-  @keyframes hint-drop {
-    0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
-    40%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
-    100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
-  }
+/* ─── Film grain ─────────────────────────────────────────────── */
+#grain-svg {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 4;
+  opacity: 0.055;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
 
-  /* ── Progress bar ── */
-  #progress {
-    position: fixed;
-    top: 0; left: 0;
-    height: 1px;
-    background: rgba(255,255,255,0.8);
-    width: 0%;
-    z-index: 100;
-    transition: width 0.05s linear;
-  }
+/* ─── Loading screen ─────────────────────────────────────────── */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  transition: opacity 1s ease, visibility 1s ease;
+}
+#loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-wordmark {
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  animation: loader-breathe 2.6s ease-in-out infinite;
+}
+@keyframes loader-breathe {
+  0%,100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+.loader-bar-wrap {
+  width: min(260px, 65vw);
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+}
+.loader-bar-fill {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.loader-bar-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: loader-scan 2s ease-in-out infinite;
+}
+@keyframes loader-scan { from { left: -60px; } to { left: 100%; } }
+.loader-sub {
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 2.5rem);
+  bottom: max(2.5rem, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  font-size: 0.6rem; font-weight: 300;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.18); white-space: nowrap;
+}
 
-  /* ── Fixed video bg ── */
-  #video-wrap {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background: #000;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-  #scrollVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
+/* ─── Scroll hint ────────────────────────────────────────────── */
+#scroll-hint {
+  position: fixed;
+  bottom: max(2.5rem, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  display: flex; flex-direction: column; align-items: center; gap: 0.55rem;
+  opacity: 0; transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+#scroll-hint.show { opacity: 1; }
+.hint-text { font-size: 0.58rem; font-weight: 300; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+.hint-line {
+  width: 1px; height: 30px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.45), transparent);
+  animation: hint-drop 1.8s ease-in-out infinite;
+}
+@keyframes hint-drop {
+  0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  45%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+}
 
-  /* ── Dark overlay ── */
-  #overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    background: rgba(0,0,0,0.35);
-    pointer-events: none;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
+/* ─── Progress bar ───────────────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.7);
+  width: 0%;
+  z-index: 100;
+  transition: width 0.06s linear;
+}
 
-  /* ── Scroll spacer ── */
-  #scroll-spacer {
-    height: 600vh;
-    position: relative;
-    z-index: 2;
-    /* pointer-events MUST be auto on iOS or touch scroll won't fire */
-    pointer-events: auto;
-  }
+/* ─── Video ──────────────────────────────────────────────────── */
+#video-wrap {
+  position: fixed; inset: 0; z-index: 0; background: #000;
+  transform: translateZ(0);
+}
+#scrollVideo {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transform: translateZ(0);
+  pointer-events: none;
+}
 
-  /* ── Content sections ── */
-  .scene {
-    position: fixed;
-    inset: 0;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none !important; /* never block scroll — links use pointer-events:auto inline */
-    opacity: 0;
-    transition: opacity 0.1s ease;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-  /* Only interactive elements within scenes get pointer events */
-  .scene a, .scene button { pointer-events: auto; }
+/* ─── Vignette overlay ───────────────────────────────────────── */
+#overlay {
+  position: fixed; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%),
+    rgba(0,0,0,0.22);
+  pointer-events: none;
+  transform: translateZ(0);
+}
 
-  .scene-inner {
-    max-width: 720px;
-    width: 90%;
-    padding: 0 2rem;
-    text-align: center;
-  }
+/* ─── Scroll spacer ──────────────────────────────────────────── */
+#scroll-spacer {
+  height: 650vh;
+  position: relative; z-index: 2;
+  pointer-events: auto;
+}
 
-  .eyebrow {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 1.6rem;
-  }
+/* ─── Nav ────────────────────────────────────────────────────── */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+#nav-logo {
+  font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  pointer-events: auto;
+}
+#nav-links {
+  display: flex; gap: 2rem; list-style: none;
+}
+#nav-links a {
+  font-size: 0.68rem; font-weight: 300;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+  pointer-events: auto;
+}
+#nav-links a:hover { color: rgba(255,255,255,0.9); }
+@media (max-width: 640px) {
+  #nav { padding: 1.4rem; }
+  #nav-links { display: none; }
+}
 
-  h1 {
-    font-size: clamp(2.4rem, 6vw, 5rem);
-    font-weight: 300;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.4rem;
-  }
+/* ─── Scenes ─────────────────────────────────────────────────── */
+.scene {
+  position: fixed; inset: 0; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none !important;
+  opacity: 0;
+  transform: translateZ(0);
+}
+.scene a, .scene button { pointer-events: auto; }
 
-  h2 {
-    font-size: clamp(1.8rem, 4vw, 3.4rem);
-    font-weight: 300;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.2rem;
-  }
+.scene-inner {
+  max-width: 740px; width: 90%;
+  padding: 0 2rem;
+  text-align: center;
+}
 
-  .body-text {
-    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-    font-weight: 300;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.7;
-    max-width: 520px;
-    margin: 0 auto;
-  }
+/* text reveal — triggered when scene enters */
+.scene-inner > * { transition: opacity 0.5s ease, transform 0.5s ease; }
+.scene.fresh .scene-inner > * { opacity: 0; transform: translateY(14px); }
+.scene.in .scene-inner > *    { opacity: 1; transform: translateY(0); }
+.scene.in .scene-inner > *:nth-child(2) { transition-delay: 0.07s; }
+.scene.in .scene-inner > *:nth-child(3) { transition-delay: 0.13s; }
+.scene.in .scene-inner > *:nth-child(4) { transition-delay: 0.19s; }
+.scene.in .scene-inner > *:nth-child(5) { transition-delay: 0.24s; }
 
-  .divider {
-    width: 40px;
-    height: 1px;
-    background: rgba(255,255,255,0.3);
-    margin: 2rem auto;
-  }
+.eyebrow {
+  font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 1.5rem;
+}
+h1 {
+  font-size: clamp(2.2rem, 5.5vw, 4.8rem);
+  font-weight: 300; line-height: 1.08; letter-spacing: -0.025em;
+  margin-bottom: 1.3rem;
+}
+h2 {
+  font-size: clamp(1.7rem, 3.8vw, 3.2rem);
+  font-weight: 300; line-height: 1.12; letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+}
+.body-text {
+  font-size: clamp(0.92rem, 1.7vw, 1.1rem);
+  font-weight: 300; color: rgba(255,255,255,0.6);
+  line-height: 1.75; max-width: 500px; margin: 0 auto;
+}
+.rule {
+  width: 36px; height: 1px;
+  background: rgba(255,255,255,0.25);
+  margin: 1.8rem auto;
+}
 
-  /* ── Project cards ── */
-  .project-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-    pointer-events: auto;
-  }
-  .project-card {
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 2px;
-    padding: 1.4rem 1.2rem;
-    text-align: left;
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(4px);
-  }
-  .project-card .tag {
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 0.75rem;
-  }
-  .project-card h3 {
-    font-size: 1rem;
-    font-weight: 400;
-    margin-bottom: 0.5rem;
-  }
-  .project-card p {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.5);
-    line-height: 1.5;
-  }
+/* ─── Work cards ─────────────────────────────────────────────── */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-top: 2.2rem;
+  pointer-events: auto;
+}
+.work-card {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 1.5rem 1.3rem 1.3rem;
+  text-align: left;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.25s, background 0.25s;
+  cursor: none;
+}
+.work-card:hover { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.05); }
+.work-tag {
+  font-size: 0.62rem; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 0.8rem;
+}
+.work-card h3 { font-size: 1rem; font-weight: 400; margin-bottom: 0.5rem; }
+.work-card p  { font-size: 0.8rem; color: rgba(255,255,255,0.48); line-height: 1.55; }
+@media (max-width: 680px) { .work-grid { grid-template-columns: 1fr; } }
 
-  /* ── CTA button ── */
-  .cta-btn {
-    display: inline-block;
-    margin-top: 2rem;
-    padding: 0.85rem 2.2rem;
-    border: 1px solid rgba(255,255,255,0.6);
-    border-radius: 2px;
-    font-size: 0.85rem;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    color: #fff;
-    text-decoration: none;
-    transition: background 0.2s, border-color 0.2s;
-    pointer-events: auto;
-  }
-  .cta-btn:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: #fff;
-  }
+/* ─── Stats row ──────────────────────────────────────────────── */
+.stats-row {
+  display: flex; gap: 3rem; justify-content: center;
+  margin-top: 2.4rem; flex-wrap: wrap;
+  pointer-events: none;
+}
+.stat-item { text-align: center; }
+.stat-num  { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 200; letter-spacing: -0.03em; }
+.stat-label{ font-size: 0.62rem; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 0.3rem; }
 
-  /* ── Logo (nav) ── */
-  #logo {
-    position: fixed;
-    top: 2rem;
-    left: 2.5rem;
-    z-index: 50;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.8);
-    pointer-events: auto;
-    text-decoration: none;
-  }
+/* ─── CTA form ───────────────────────────────────────────────── */
+.cta-form {
+  display: flex; gap: 0; margin-top: 2rem;
+  max-width: 400px; margin-left: auto; margin-right: auto;
+  pointer-events: auto;
+}
+.cta-input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-right: none;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.85rem; font-weight: 300;
+  color: #fff; font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.cta-input::placeholder { color: rgba(255,255,255,0.3); }
+.cta-input:focus { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); }
+.cta-submit {
+  background: #fff; color: #000;
+  border: 1px solid #fff;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: none;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.cta-submit:hover { background: rgba(255,255,255,0.85); }
+.cta-note {
+  font-size: 0.65rem; color: rgba(255,255,255,0.25);
+  margin-top: 0.85rem; letter-spacing: 0.08em;
+}
+.cta-success { display: none; color: rgba(255,255,255,0.55); font-size: 0.9rem; margin-top: 2rem; letter-spacing: 0.06em; }
+@media (max-width: 480px) {
+  .cta-form { flex-direction: column; }
+  .cta-input { border-right: 1px solid rgba(255,255,255,0.25); border-bottom: none; }
+  .cta-submit { padding: 0.85rem; }
+}
 
-  /* ── Footer scene ── */
-  #scene-footer {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  #scene-footer .footer-logo {
-    font-size: 1.8rem;
-    font-weight: 200;
-    letter-spacing: 0.08em;
-  }
-  #scene-footer .footer-sub {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.35);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 640px) {
-    .project-grid { grid-template-columns: 1fr; gap: 1rem; }
-    #logo { top: 1.2rem; left: 1.4rem; }
-  }
+/* ─── Footer scene ───────────────────────────────────────────── */
+#scene-footer { align-items: flex-end; padding-bottom: max(3rem, env(safe-area-inset-bottom)); }
+.footer-inner {
+  width: 90%; max-width: 1100px;
+  padding: 0 2rem 3rem;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 2rem;
+}
+.footer-logo { font-size: 0.78rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+.footer-links { display: flex; gap: 1.8rem; }
+.footer-links a { font-size: 0.65rem; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.2s; pointer-events: auto; }
+.footer-links a:hover { color: rgba(255,255,255,0.7); }
+@media (max-width: 600px) { .footer-inner { flex-direction: column; gap: 1.5rem; align-items: center; text-align: center; } }
 </style>
 </head>
 <body>
 
-<!-- Loading screen -->
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Film grain -->
+<svg id="grain-svg" xmlns="http://www.w3.org/2000/svg">
+  <filter id="grain-filter" x="0%" y="0%" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4"
+      stitchTiles="stitch" id="grain-turbulence"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grain-filter)"/>
+</svg>
+
+<!-- Loader -->
 <div id="loader">
   <div class="loader-wordmark">Vobius Labs</div>
-  <div class="loader-bar-wrap">
-    <div class="loader-bar-fill" id="loaderFill"></div>
-  </div>
+  <div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderFill"></div></div>
   <span class="loader-sub">Loading experience</span>
 </div>
 
-<!-- Progress bar -->
+<!-- Progress -->
 <div id="progress"></div>
 
 <!-- Scroll hint -->
 <div id="scroll-hint">
   <div class="hint-text">Scroll</div>
-  <div class="hint-arrow"></div>
+  <div class="hint-line"></div>
 </div>
 
-<!-- Logo -->
-<a href="#" id="logo">Vobius Labs</a>
+<!-- Nav -->
+<nav id="nav">
+  <a href="#" id="nav-logo">Vobius Labs</a>
+  <ul id="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
 
-<!-- Video background -->
+<!-- Video -->
 <div id="video-wrap">
   <video id="scrollVideo" muted playsinline webkit-playsinline preload="auto"
-    x-webkit-airplay="allow" style="pointer-events:none">
-    <source src="video.mp4" type="video/mp4">
+         x-webkit-airplay="allow" style="pointer-events:none">
+    <source id="videoSrc" src="video.mp4" type="video/mp4">
   </video>
 </div>
 
-<!-- Dark overlay -->
+<!-- Vignette -->
 <div id="overlay"></div>
 
-<!-- Scroll spacer (drives scroll height) -->
+<!-- Scroll spacer -->
 <div id="scroll-spacer"></div>
 
-<!-- SCENE 1: Intro (0–18%) -->
-<div class="scene" id="scene-1" data-start="0" data-end="0.18">
+<!-- ── SCENE 1: Hero (0–15%) ─────────────────────────────────── -->
+<div class="scene fresh" id="scene-1" data-start="0" data-end="0.15">
   <div class="scene-inner">
-    <p class="eyebrow">Welcome to Vobius Labs</p>
-    <h1>We build digital products that matter.</h1>
-    <div class="divider"></div>
-    <p class="body-text">Software, apps, and web experiences crafted for businesses that want to move fast and look great doing it.</p>
+    <p class="eyebrow">Vobius Labs · Edmonton, AB</p>
+    <h1>Digital products built to last.</h1>
+    <div class="rule"></div>
+    <p class="body-text">We craft iOS apps, web platforms, and brand experiences for companies that refuse to ship mediocre software.</p>
   </div>
 </div>
 
-<!-- SCENE 2: What we do (22–40%) -->
-<div class="scene" id="scene-2" data-start="0.22" data-end="0.40">
+<!-- ── SCENE 2: What we do (20–36%) ──────────────────────────── -->
+<div class="scene fresh" id="scene-2" data-start="0.20" data-end="0.36">
   <div class="scene-inner">
     <p class="eyebrow">What We Do</p>
-    <h2>From idea to shipped product — fast.</h2>
-    <div class="divider"></div>
-    <p class="body-text">We design and develop iOS apps, web platforms, and digital experiences. Every project is built from scratch — no templates, no shortcuts, no compromises on quality.</p>
+    <h2>Idea to shipped — without compromise.</h2>
+    <div class="rule"></div>
+    <p class="body-text">We build from scratch. No templates. No bloated agencies. Just a focused team that's done it before and knows how to move fast without cutting corners.</p>
   </div>
 </div>
 
-<!-- SCENE 3: Our work (44–62%) -->
-<div class="scene" id="scene-3" data-start="0.44" data-end="0.62">
-  <div class="scene-inner" style="max-width:900px">
+<!-- ── SCENE 3: By the numbers (40–54%) ──────────────────────── -->
+<div class="scene fresh" id="scene-3" data-start="0.40" data-end="0.54">
+  <div class="scene-inner">
+    <p class="eyebrow">By the Numbers</p>
+    <h2>Results that speak for themselves.</h2>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">3+</div><div class="stat-label">Products shipped</div></div>
+      <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Client satisfaction</div></div>
+      <div class="stat-item"><div class="stat-num">2026</div><div class="stat-label">Founded</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCENE 4: Work (58–74%) ─────────────────────────────────── -->
+<div class="scene fresh" id="scene-4" data-start="0.58" data-end="0.74">
+  <div class="scene-inner" id="work" style="max-width:860px">
     <p class="eyebrow">Selected Work</p>
     <h2>Products we've shipped.</h2>
-    <div class="project-grid">
-      <div class="project-card">
-        <div class="tag">iOS App</div>
+    <div class="work-grid">
+      <div class="work-card">
+        <div class="work-tag">iOS App</div>
         <h3>DayWent</h3>
-        <p>A beautiful daily journal app that helps you reflect on your day in seconds.</p>
+        <p>A daily journal app that helps you capture your day in under 60 seconds.</p>
       </div>
-      <div class="project-card">
-        <div class="tag">E-commerce</div>
+      <div class="work-card">
+        <div class="work-tag">E-commerce</div>
         <h3>Sierra Cedro</h3>
-        <p>Premium Canadian wood products — brand, store, and digital presence built from zero.</p>
+        <p>Premium Canadian wood products. Brand, Shopify store, and digital presence built from zero.</p>
       </div>
-      <div class="project-card">
-        <div class="tag">Platform</div>
-        <h3>[Project Name]</h3>
-        <p>Placeholder — describe a third project or client engagement here.</p>
+      <div class="work-card">
+        <div class="work-tag">Web Outreach</div>
+        <h3>Vobius Outreach</h3>
+        <p>AI-powered lead generation and site-building pipeline targeting 200 businesses per day.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SCENE 4: About (65–80%) -->
-<div class="scene" id="scene-4" data-start="0.65" data-end="0.80">
-  <div class="scene-inner">
+<!-- ── SCENE 5: About (78–88%) ────────────────────────────────── -->
+<div class="scene fresh" id="scene-5" data-start="0.78" data-end="0.88">
+  <div class="scene-inner" id="about">
     <p class="eyebrow">About</p>
-    <h2>Built by people who care about craft.</h2>
-    <div class="divider"></div>
-    <p class="body-text">Vobius Labs was founded by Nathan Gardner in Edmonton, Alberta. We're a small, focused team that takes on a limited number of projects at a time — so every client gets our full attention and best work.</p>
+    <h2>Small team. Big output.</h2>
+    <div class="rule"></div>
+    <p class="body-text">Founded by Nathan Gardner in Edmonton, Alberta. We take on a limited number of projects each quarter so every client gets our complete focus. No hand-offs. No account managers. Just direct access to the people building your product.</p>
   </div>
 </div>
 
-<!-- SCENE 5: CTA (83–95%) -->
-<div class="scene" id="scene-5" data-start="0.83" data-end="0.95">
-  <div class="scene-inner">
+<!-- ── SCENE 6: CTA (91–98%) ──────────────────────────────────── -->
+<div class="scene fresh" id="scene-6" data-start="0.91" data-end="0.98">
+  <div class="scene-inner" id="contact">
     <p class="eyebrow">Let's Work Together</p>
-    <h2>Ready to build something?</h2>
-    <div class="divider"></div>
-    <p class="body-text">We take on a small number of new projects each quarter. If you have something in mind, reach out — we'd love to hear about it.</p>
-    <a href="mailto:labs@vobius.com" class="cta-btn">Get in Touch →</a>
+    <h2>Have a project in mind?</h2>
+    <div class="rule"></div>
+    <p class="body-text">We're taking on new projects now. Drop your email and tell us what you're building.</p>
+    <form class="cta-form" id="cta-form">
+      <input class="cta-input" type="email" placeholder="your@email.com" required>
+      <button class="cta-submit" type="submit">Let's Talk →</button>
+    </form>
+    <p class="cta-note">No spam. We'll reply within 24 hours.</p>
+    <p class="cta-success" id="cta-success">✓ &nbsp;Got it — we'll be in touch soon.</p>
   </div>
 </div>
 
-<!-- SCENE 6: Footer (97–100%) -->
-<div class="scene" id="scene-footer" data-start="0.97" data-end="1.0">
-  <div class="scene-inner">
-    <div class="footer-logo">Vobius Labs</div>
-    <div class="footer-sub">vobiuslabs.com · Edmonton, AB · © 2026</div>
+<!-- ── SCENE 7: Footer (99–100%) ──────────────────────────────── -->
+<div class="scene fresh" id="scene-footer" data-start="0.99" data-end="1.0">
+  <div class="footer-inner">
+    <div class="footer-logo">Vobius Labs · © 2026</div>
+    <div class="footer-links">
+      <a href="mailto:labs@vobius.com">labs@vobius.com</a>
+      <a href="https://vobiuslabs.com">vobiuslabs.com</a>
+    </div>
   </div>
 </div>
 
@@ -452,36 +517,33 @@
 (function () {
   'use strict';
 
-  const video       = document.getElementById('scrollVideo');
-  const spacer      = document.getElementById('scroll-spacer');
-  const progress    = document.getElementById('progress');
-  const scenes      = document.querySelectorAll('.scene');
-  const loader      = document.getElementById('loader');
-  const loaderFill  = document.getElementById('loaderFill');
-
-  const SCROLL_VH   = 600;
-  let videoReady    = false;
-  let ticking       = false;
-  let loaderDone    = false;
-
-  let videoUnlocked = false;
-
-  function unlockVideo() {
-    if (videoUnlocked) return;
-    videoUnlocked = true;
-    // iOS requires a play() call from user gesture context before seeking works
-    const p = video.play();
-    if (p && p.then) {
-      p.then(() => {
-        video.pause();
-        videoReady = true;
-        update();
-      }).catch(() => {});
-    }
-  }
-
+  /* ── Elements ── */
+  const video      = document.getElementById('scrollVideo');
+  const spacer     = document.getElementById('scroll-spacer');
+  const progressEl = document.getElementById('progress');
+  const scenes     = document.querySelectorAll('.scene');
+  const loader     = document.getElementById('loader');
+  const loaderFill = document.getElementById('loaderFill');
   const scrollHint = document.getElementById('scroll-hint');
+  const cursor     = document.getElementById('cursor');
+  const turbulence = document.getElementById('grain-turbulence');
+  const ctaForm    = document.getElementById('cta-form');
+  const ctaSuccess = document.getElementById('cta-success');
 
+  const SCROLL_VH  = 650;
+  let videoReady   = false;
+  let ticking      = false;
+  let loaderDone   = false;
+  let videoUnlocked= false;
+
+  /* ── Lerp scrub state ── */
+  let currentVideoTime = 0;
+  let targetVideoTime  = 0;
+  let rafRunning       = false;
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* LOADER                                                       */
+  /* ─────────────────────────────────────────────────────────── */
   function dismissLoader() {
     if (loaderDone) return;
     loaderDone = true;
@@ -489,141 +551,210 @@
     setTimeout(() => {
       loader.classList.add('hidden');
       unlockVideo();
-      // Show scroll hint briefly
       scrollHint.classList.add('show');
-      setTimeout(() => scrollHint.classList.remove('show'), 4000);
-    }, 350);
+      setTimeout(() => scrollHint.classList.remove('show'), 5000);
+    }, 400);
   }
 
-  // ── Init ────────────────────────────────────────────────────────────────────
+  /* ─────────────────────────────────────────────────────────── */
+  /* VIDEO UNLOCK (iOS needs play() from gesture)                */
+  /* ─────────────────────────────────────────────────────────── */
+  function unlockVideo() {
+    if (videoUnlocked) return;
+    videoUnlocked = true;
+    const p = video.play();
+    if (p && p.then) {
+      p.then(() => { video.pause(); videoReady = true; update(); }).catch(() => {});
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* FILM GRAIN ANIMATION                                         */
+  /* ─────────────────────────────────────────────────────────── */
+  let grainSeed = 0;
+  let lastGrainUpdate = 0;
+  function animateGrain(ts) {
+    if (ts - lastGrainUpdate > 80) { // ~12fps grain
+      turbulence.setAttribute('seed', ++grainSeed % 200);
+      lastGrainUpdate = ts;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* CUSTOM CURSOR                                                */
+  /* ─────────────────────────────────────────────────────────── */
+  let cx = -100, cy = -100;
+  let tx = -100, ty = -100;
+  function onMouseMove(e) {
+    tx = e.clientX; ty = e.clientY;
+    cursor.classList.remove('hidden');
+  }
+  function onMouseLeave() { cursor.classList.add('hidden'); }
+  function onMouseOverLink(e) {
+    if (e.target.closest('a, button, input')) cursor.classList.add('big');
+    else cursor.classList.remove('big');
+  }
+  document.addEventListener('mousemove', onMouseMove, { passive: true });
+  document.addEventListener('mouseleave', onMouseLeave);
+  document.addEventListener('mouseover', onMouseOverLink, { passive: true });
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* SEEK HELPER                                                  */
+  /* ─────────────────────────────────────────────────────────── */
+  function seekTo(t) {
+    try {
+      if (video.fastSeek) { video.fastSeek(t); }
+      else { video.currentTime = t; }
+    } catch (_) {}
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* INIT                                                         */
+  /* ─────────────────────────────────────────────────────────── */
   function init() {
     spacer.style.height = `${SCROLL_VH}vh`;
 
-    // Buffer progress → fill loader bar
+    // Adaptive source: load smaller video on mobile
+    if (window.innerWidth < 768 && window.devicePixelRatio < 3) {
+      // Keep same source for now — add video-mobile.mp4 later for bandwidth savings
+    }
+
     video.addEventListener('progress', () => {
       if (!video.duration || loaderDone) return;
       try {
         const buf = video.buffered;
-        if (buf.length > 0) {
+        if (buf.length) {
           const pct = Math.min(buf.end(buf.length - 1) / video.duration, 1);
           loaderFill.style.width = `${pct * 100}%`;
-          if (pct >= 0.5) dismissLoader(); // dismiss once 50% buffered
+          if (pct >= 0.45) dismissLoader();
         }
       } catch (_) {}
     });
-
     video.addEventListener('canplaythrough', dismissLoader);
-
     video.addEventListener('loadedmetadata', () => {
       videoReady = true;
       video.pause();
       video.currentTime = 0;
+      currentVideoTime = 0;
       update();
     });
+    video.addEventListener('error', () => { dismissLoader(); });
 
-    video.addEventListener('error', () => {
-      document.getElementById('video-wrap').style.background = '#000';
-      dismissLoader(); // show page even if video fails
-    });
+    setTimeout(dismissLoader, 6000);
+    if (video.readyState >= 4) { videoReady = true; video.pause(); dismissLoader(); }
+    else if (video.readyState >= 1) { videoReady = true; video.pause(); }
 
-    // Fallback: dismiss loader after 5s no matter what
-    setTimeout(dismissLoader, 5000);
-
-    if (video.readyState >= 4) {
-      videoReady = true;
-      video.pause();
-      dismissLoader();
-    } else if (video.readyState >= 1) {
-      videoReady = true;
-      video.pause();
-    }
-
-    // Unlock video on first user interaction (critical for iOS)
-    ['touchstart', 'touchend', 'mousedown', 'scroll'].forEach(evt => {
-      window.addEventListener(evt, unlockVideo, { once: true, passive: true });
-    });
-
+    ['touchstart', 'touchend', 'mousedown', 'scroll'].forEach(evt =>
+      window.addEventListener(evt, unlockVideo, { once: true, passive: true })
+    );
     window.addEventListener('scroll', () => scrollHint.classList.remove('show'), { once: true, passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', update, { passive: true });
-    requestAnimationFrame(update);
-  }
 
-  // ── Scroll handler ───────────────────────────────────────────────────────────
-  function onScroll() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
-    }
-  }
-
-  // ── Seek helper (iOS prefers fastSeek) ──────────────────────────────────────
-  function seekTo(t) {
-    try {
-      if (video.fastSeek) {
-        video.fastSeek(t);
-      } else {
-        video.currentTime = t;
+    // CTA form
+    ctaForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const email = ctaForm.querySelector('input').value;
+      if (email) {
+        ctaForm.style.display = 'none';
+        ctaForm.nextElementSibling.style.display = 'none'; // note
+        ctaSuccess.style.display = 'block';
+        // Fire mailto as fallback
+        window.location.href = `mailto:labs@vobius.com?subject=Project enquiry&body=Email: ${email}`;
       }
-    } catch (_) {}
+    });
+
+    startRaf();
   }
 
-  // ── Main update loop ─────────────────────────────────────────────────────────
+  /* ─────────────────────────────────────────────────────────── */
+  /* RAF LOOP                                                     */
+  /* ─────────────────────────────────────────────────────────── */
+  function startRaf() { if (!rafRunning) { rafRunning = true; requestAnimationFrame(rafLoop); } }
+  function rafLoop(ts) {
+    rafRunning = true;
+
+    // Cursor lerp
+    cx += (tx - cx) * 0.18;
+    cy += (ty - cy) * 0.18;
+    cursor.style.left = `${cx}px`;
+    cursor.style.top  = `${cy}px`;
+
+    // Grain animation
+    animateGrain(ts);
+
+    requestAnimationFrame(rafLoop);
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* SCROLL HANDLER                                               */
+  /* ─────────────────────────────────────────────────────────── */
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }
+
+  /* ─────────────────────────────────────────────────────────── */
+  /* MAIN UPDATE                                                  */
+  /* ─────────────────────────────────────────────────────────── */
   function update() {
     ticking = false;
 
-    const scrollTop  = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-    const maxScroll  = Math.max(
-      document.documentElement.scrollHeight - window.innerHeight,
-      spacer.offsetHeight - window.innerHeight,
-      1
-    );
-    const pct        = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+    const pct = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
 
     // Progress bar
-    progress.style.width = `${pct * 100}%`;
+    progressEl.style.width = `${pct * 100}%`;
 
-    // Scrub video — always seek, iOS is OK with frequent seeks when preloaded
+    // Video seek with gentle lerp (smooth on desktop, direct on mobile)
     if (videoReady && video.duration) {
-      const target = pct * video.duration;
-      if (Math.abs(video.currentTime - target) > 0.008) {
-        seekTo(target);
+      targetVideoTime = pct * video.duration;
+      const isTouch = window.matchMedia('(pointer: coarse)').matches;
+      if (isTouch) {
+        // Direct seek on mobile for responsiveness
+        if (Math.abs(video.currentTime - targetVideoTime) > 0.01) seekTo(targetVideoTime);
+      } else {
+        // Lerp on desktop for cinematic smoothness
+        currentVideoTime += (targetVideoTime - currentVideoTime) * 0.22;
+        if (Math.abs(video.currentTime - currentVideoTime) > 0.008) seekTo(currentVideoTime);
       }
     }
 
-    // Scenes
+    // Scene visibility + text reveal
     scenes.forEach(scene => {
       const start    = parseFloat(scene.dataset.start);
       const end      = parseFloat(scene.dataset.end);
       const range    = end - start;
-      const fadeZone = range * 0.18;
+      const fadeZone = range * 0.2;
 
       let opacity = 0;
       if (pct >= start && pct <= end) {
-        if (pct < start + fadeZone) {
-          opacity = (pct - start) / fadeZone;
-        } else if (pct > end - fadeZone) {
-          opacity = (end - pct) / fadeZone;
-        } else {
-          opacity = 1;
-        }
+        if (pct < start + fadeZone)        opacity = (pct - start) / fadeZone;
+        else if (pct > end - fadeZone)     opacity = (end - pct) / fadeZone;
+        else                               opacity = 1;
       }
       opacity = Math.min(Math.max(opacity, 0), 1);
       scene.style.opacity = opacity;
-      if (opacity > 0.01) {
-        scene.classList.add('visible');
-      } else {
-        scene.classList.remove('visible');
+
+      // Text reveal: add .in when scene is entering
+      if (opacity > 0.25 && scene.classList.contains('fresh')) {
+        scene.classList.remove('fresh');
+        scene.classList.add('in');
+      }
+      // Reset when fully gone so it can animate again on re-scroll
+      if (opacity < 0.02 && scene.classList.contains('in')) {
+        scene.classList.remove('in');
+        scene.classList.add('fresh');
       }
     });
   }
 
-  // ── Boot ─────────────────────────────────────────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  /* ─────────────────────────────────────────────────────────── */
+  /* BOOT                                                         */
+  /* ─────────────────────────────────────────────────────────── */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
 })();
 </script>
 </body>
