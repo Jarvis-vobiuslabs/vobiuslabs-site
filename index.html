@@ -1,151 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vobius Labs</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<title>Vobius Labs — We build digital products that matter</title>
+<meta name="description" content="Vobius Labs is a software company that builds digital products, apps, and web experiences.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    height: 100%;
+  }
+
+  /* ── Progress bar ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.8);
+    width: 0%;
+    z-index: 100;
+    transition: width 0.05s linear;
+  }
+
+  /* ── Fixed video bg ── */
+  #video-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: #000;
+  }
+  #scrollVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Dark overlay ── */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0,0,0,0.35);
+    pointer-events: none;
+  }
+
+  /* ── Scroll spacer ── */
+  #scroll-spacer {
+    height: 600vh;
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ── Content sections ── */
+  .scene {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+  }
+  .scene.visible { pointer-events: auto; }
+
+  .scene-inner {
+    max-width: 720px;
+    width: 90%;
+    padding: 0 2rem;
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.6rem;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.4rem;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 3.4rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+  }
+
+  .body-text {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    font-weight: 300;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+    margin: 2rem auto;
+  }
+
+  /* ── Project cards ── */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+    pointer-events: auto;
+  }
+  .project-card {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 2px;
+    padding: 1.4rem 1.2rem;
+    text-align: left;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(4px);
+  }
+  .project-card .tag {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 0.75rem;
+  }
+  .project-card h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+  .project-card p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+  }
+
+  /* ── CTA button ── */
+  .cta-btn {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.85rem 2.2rem;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 2px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+    pointer-events: auto;
+  }
+  .cta-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: #fff;
+  }
+
+  /* ── Logo (nav) ── */
+  #logo {
+    position: fixed;
+    top: 2rem;
+    left: 2.5rem;
+    z-index: 50;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    pointer-events: auto;
+    text-decoration: none;
+  }
+
+  /* ── Footer scene ── */
+  #scene-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  #scene-footer .footer-logo {
+    font-size: 1.8rem;
+    font-weight: 200;
+    letter-spacing: 0.08em;
+  }
+  #scene-footer .footer-sub {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    .project-grid { grid-template-columns: 1fr; gap: 1rem; }
+    #logo { top: 1.2rem; left: 1.4rem; }
+  }
+</style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="nav-logo">VOBIUS LABS</div>
-    <div class="nav-links">
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#work">Work</a>
-      <a href="#contact" class="nav-cta">Get in Touch</a>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- Logo -->
+<a href="#" id="logo">Vobius Labs</a>
+
+<!-- Video background -->
+<div id="video-wrap">
+  <video id="scrollVideo" muted playsinline webkit-playsinline preload="auto">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Dark overlay -->
+<div id="overlay"></div>
+
+<!-- Scroll spacer (drives scroll height) -->
+<div id="scroll-spacer"></div>
+
+<!-- SCENE 1: Intro (0–18%) -->
+<div class="scene" id="scene-1" data-start="0" data-end="0.18">
+  <div class="scene-inner">
+    <p class="eyebrow">Welcome to Vobius Labs</p>
+    <h1>We build digital products that matter.</h1>
+    <div class="divider"></div>
+    <p class="body-text">Software, apps, and web experiences crafted for businesses that want to move fast and look great doing it.</p>
+  </div>
+</div>
+
+<!-- SCENE 2: What we do (22–40%) -->
+<div class="scene" id="scene-2" data-start="0.22" data-end="0.40">
+  <div class="scene-inner">
+    <p class="eyebrow">What We Do</p>
+    <h2>From idea to shipped product — fast.</h2>
+    <div class="divider"></div>
+    <p class="body-text">We design and develop iOS apps, web platforms, and digital experiences. Every project is built from scratch — no templates, no shortcuts, no compromises on quality.</p>
+  </div>
+</div>
+
+<!-- SCENE 3: Our work (44–62%) -->
+<div class="scene" id="scene-3" data-start="0.44" data-end="0.62">
+  <div class="scene-inner" style="max-width:900px">
+    <p class="eyebrow">Selected Work</p>
+    <h2>Products we've shipped.</h2>
+    <div class="project-grid">
+      <div class="project-card">
+        <div class="tag">iOS App</div>
+        <h3>DayWent</h3>
+        <p>A beautiful daily journal app that helps you reflect on your day in seconds.</p>
+      </div>
+      <div class="project-card">
+        <div class="tag">E-commerce</div>
+        <h3>Sierra Cedro</h3>
+        <p>Premium Canadian wood products — brand, store, and digital presence built from zero.</p>
+      </div>
+      <div class="project-card">
+        <div class="tag">Platform</div>
+        <h3>[Project Name]</h3>
+        <p>Placeholder — describe a third project or client engagement here.</p>
+      </div>
     </div>
-  </nav>
-
-  <!-- Scroll Progress Bar -->
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
   </div>
+</div>
 
-  <!-- Video Container (fixed) -->
-  <div class="video-container" id="videoContainer">
-    <video id="scrollVideo" muted preload="auto" playsinline webkit-playsinline>
-      <source src="video.mp4" type="video/mp4">
-    </video>
-    <div class="video-overlay"></div>
+<!-- SCENE 4: About (65–80%) -->
+<div class="scene" id="scene-4" data-start="0.65" data-end="0.80">
+  <div class="scene-inner">
+    <p class="eyebrow">About</p>
+    <h2>Built by people who care about craft.</h2>
+    <div class="divider"></div>
+    <p class="body-text">Vobius Labs was founded by Nathan Gardner in Edmonton, Alberta. We're a small, focused team that takes on a limited number of projects at a time — so every client gets our full attention and best work.</p>
   </div>
+</div>
 
-  <!-- Scroll Spacer - this creates the scrollable area -->
-  <div class="scroll-spacer" id="scrollSpacer">
-
-    <!-- Hero Section -->
-    <section class="content-block" data-start="0" data-end="0.08">
-      <div class="content-inner hero-content">
-        <h1 class="hero-title">
-          <span class="line">We build the</span>
-          <span class="line accent">future.</span>
-        </h1>
-        <p class="hero-subtitle">Scroll to explore our journey</p>
-        <div class="scroll-indicator">
-          <div class="scroll-arrow"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 1 -->
-    <section class="content-block" data-start="0.12" data-end="0.22">
-      <div class="content-inner content-left">
-        <span class="section-tag">01 / About</span>
-        <h2>Reimagining what's possible</h2>
-        <p>Placeholder text for your company introduction. Describe your mission, your vision, and what drives Vobius Labs to push boundaries every day.</p>
-      </div>
-    </section>
-
-    <!-- Section 2 -->
-    <section class="content-block" data-start="0.26" data-end="0.36">
-      <div class="content-inner content-right">
-        <span class="section-tag">02 / Approach</span>
-        <h2>Design meets engineering</h2>
-        <p>Placeholder for your approach. Explain how you combine creative thinking with technical excellence to deliver extraordinary results.</p>
-      </div>
-    </section>
-
-    <!-- Section 3 - Stats -->
-    <section class="content-block" data-start="0.40" data-end="0.50">
-      <div class="content-inner content-center">
-        <span class="section-tag">03 / Impact</span>
-        <div class="stats-grid">
-          <div class="stat">
-            <span class="stat-number">150+</span>
-            <span class="stat-label">Projects Delivered</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">50+</span>
-            <span class="stat-label">Global Clients</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">12</span>
-            <span class="stat-label">Years of Innovation</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 4 -->
-    <section class="content-block" data-start="0.54" data-end="0.64">
-      <div class="content-inner content-left">
-        <span class="section-tag">04 / Services</span>
-        <h2>What we do</h2>
-        <div class="services-list">
-          <div class="service-item">
-            <h3>Strategy & Consulting</h3>
-            <p>Placeholder for service description.</p>
-          </div>
-          <div class="service-item">
-            <h3>Product Development</h3>
-            <p>Placeholder for service description.</p>
-          </div>
-          <div class="service-item">
-            <h3>Digital Experiences</h3>
-            <p>Placeholder for service description.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 5 -->
-    <section class="content-block" data-start="0.68" data-end="0.78">
-      <div class="content-inner content-right">
-        <span class="section-tag">05 / Work</span>
-        <h2>Selected projects</h2>
-        <p>Placeholder for featured work showcase. Highlight your best projects and the impact they've made.</p>
-        <a href="#" class="cta-link">View all projects &rarr;</a>
-      </div>
-    </section>
-
-    <!-- Section 6 - CTA -->
-    <section class="content-block" data-start="0.84" data-end="0.96">
-      <div class="content-inner content-center">
-        <h2 class="cta-title">Ready to start<br>something great?</h2>
-        <p class="cta-text">Let's talk about your next project.</p>
-        <a href="mailto:hello@vobiuslabs.com" class="cta-button">Get in Touch</a>
-      </div>
-    </section>
-
+<!-- SCENE 5: CTA (83–95%) -->
+<div class="scene" id="scene-5" data-start="0.83" data-end="0.95">
+  <div class="scene-inner">
+    <p class="eyebrow">Let's Work Together</p>
+    <h2>Ready to build something?</h2>
+    <div class="divider"></div>
+    <p class="body-text">We take on a small number of new projects each quarter. If you have something in mind, reach out — we'd love to hear about it.</p>
+    <a href="mailto:labs@vobius.com" class="cta-btn">Get in Touch →</a>
   </div>
+</div>
 
-  <!-- Footer (after scroll spacer) -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-brand">VOBIUS LABS</div>
-      <div class="footer-links">
-        <a href="#">Twitter</a>
-        <a href="#">LinkedIn</a>
-        <a href="#">Instagram</a>
-      </div>
-      <div class="footer-copy">&copy; 2026 Vobius Labs. All rights reserved.</div>
-    </div>
-  </footer>
+<!-- SCENE 6: Footer (97–100%) -->
+<div class="scene" id="scene-footer" data-start="0.97" data-end="1.0">
+  <div class="scene-inner">
+    <div class="footer-logo">Vobius Labs</div>
+    <div class="footer-sub">vobiuslabs.com · Edmonton, AB · © 2026</div>
+  </div>
+</div>
 
-  <script src="script.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const video       = document.getElementById('scrollVideo');
+  const spacer      = document.getElementById('scroll-spacer');
+  const progress    = document.getElementById('progress');
+  const scenes      = document.querySelectorAll('.scene');
+
+  const SCROLL_VH   = 600;
+  let videoReady    = false;
+  let ticking       = false;
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+  function init() {
+    spacer.style.height = `${SCROLL_VH}vh`;
+
+    video.addEventListener('loadedmetadata', () => {
+      videoReady = true;
+      video.pause();
+      video.currentTime = 0;
+      update();
+    });
+
+    video.addEventListener('error', () => {
+      document.getElementById('video-wrap').style.background = '#000';
+    });
+
+    if (video.readyState >= 1) {
+      videoReady = true;
+      video.pause();
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    requestAnimationFrame(update);
+  }
+
+  // ── Scroll handler ───────────────────────────────────────────────────────────
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  // ── Main update loop ─────────────────────────────────────────────────────────
+  function update() {
+    ticking = false;
+
+    const scrollTop  = window.scrollY || window.pageYOffset;
+    const maxScroll  = Math.max(spacer.offsetHeight - window.innerHeight, 1);
+    const pct        = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
+
+    // Progress bar
+    progress.style.width = `${pct * 100}%`;
+
+    // Scrub video
+    if (videoReady && video.duration) {
+      const target = pct * video.duration;
+      if (Math.abs(video.currentTime - target) > 0.016) {
+        try { video.currentTime = target; } catch (_) {}
+      }
+    }
+
+    // Scenes
+    scenes.forEach(scene => {
+      const start    = parseFloat(scene.dataset.start);
+      const end      = parseFloat(scene.dataset.end);
+      const range    = end - start;
+      const fadeZone = range * 0.18;
+
+      let opacity = 0;
+      if (pct >= start && pct <= end) {
+        if (pct < start + fadeZone) {
+          opacity = (pct - start) / fadeZone;
+        } else if (pct > end - fadeZone) {
+          opacity = (end - pct) / fadeZone;
+        } else {
+          opacity = 1;
+        }
+      }
+      opacity = Math.min(Math.max(opacity, 0), 1);
+      scene.style.opacity = opacity;
+      if (opacity > 0.01) {
+        scene.classList.add('visible');
+      } else {
+        scene.classList.remove('visible');
+      }
+    });
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 </body>
 </html>
