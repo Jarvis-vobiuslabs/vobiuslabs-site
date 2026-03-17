@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vobius Labs</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-logo">VOBIUS LABS</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#contact" class="nav-cta">Get in Touch</a>
+    </div>
+  </nav>
+
+  <!-- Scroll Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <!-- Video Container (fixed) -->
+  <div class="video-container" id="videoContainer">
+    <video id="scrollVideo" muted preload="auto" playsinline>
+      <source src="video.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- Scroll Spacer - this creates the scrollable area -->
+  <div class="scroll-spacer" id="scrollSpacer">
+
+    <!-- Hero Section -->
+    <section class="content-block" data-start="0" data-end="0.08">
+      <div class="content-inner hero-content">
+        <h1 class="hero-title">
+          <span class="line">We build the</span>
+          <span class="line accent">future.</span>
+        </h1>
+        <p class="hero-subtitle">Scroll to explore our journey</p>
+        <div class="scroll-indicator">
+          <div class="scroll-arrow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1 -->
+    <section class="content-block" data-start="0.12" data-end="0.22">
+      <div class="content-inner content-left">
+        <span class="section-tag">01 / About</span>
+        <h2>Reimagining what's possible</h2>
+        <p>Placeholder text for your company introduction. Describe your mission, your vision, and what drives Vobius Labs to push boundaries every day.</p>
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="content-block" data-start="0.26" data-end="0.36">
+      <div class="content-inner content-right">
+        <span class="section-tag">02 / Approach</span>
+        <h2>Design meets engineering</h2>
+        <p>Placeholder for your approach. Explain how you combine creative thinking with technical excellence to deliver extraordinary results.</p>
+      </div>
+    </section>
+
+    <!-- Section 3 - Stats -->
+    <section class="content-block" data-start="0.40" data-end="0.50">
+      <div class="content-inner content-center">
+        <span class="section-tag">03 / Impact</span>
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-number">150+</span>
+            <span class="stat-label">Projects Delivered</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">50+</span>
+            <span class="stat-label">Global Clients</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">12</span>
+            <span class="stat-label">Years of Innovation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="content-block" data-start="0.54" data-end="0.64">
+      <div class="content-inner content-left">
+        <span class="section-tag">04 / Services</span>
+        <h2>What we do</h2>
+        <div class="services-list">
+          <div class="service-item">
+            <h3>Strategy & Consulting</h3>
+            <p>Placeholder for service description.</p>
+          </div>
+          <div class="service-item">
+            <h3>Product Development</h3>
+            <p>Placeholder for service description.</p>
+          </div>
+          <div class="service-item">
+            <h3>Digital Experiences</h3>
+            <p>Placeholder for service description.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="content-block" data-start="0.68" data-end="0.78">
+      <div class="content-inner content-right">
+        <span class="section-tag">05 / Work</span>
+        <h2>Selected projects</h2>
+        <p>Placeholder for featured work showcase. Highlight your best projects and the impact they've made.</p>
+        <a href="#" class="cta-link">View all projects &rarr;</a>
+      </div>
+    </section>
+
+    <!-- Section 6 - CTA -->
+    <section class="content-block" data-start="0.84" data-end="0.96">
+      <div class="content-inner content-center">
+        <h2 class="cta-title">Ready to start<br>something great?</h2>
+        <p class="cta-text">Let's talk about your next project.</p>
+        <a href="mailto:hello@vobiuslabs.com" class="cta-button">Get in Touch</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer (after scroll spacer) -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">VOBIUS LABS</div>
+      <div class="footer-links">
+        <a href="#">Twitter</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Instagram</a>
+      </div>
+      <div class="footer-copy">&copy; 2026 Vobius Labs. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

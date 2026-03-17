@@ -1,0 +1,431 @@
+/* ============================================
+   VOBIUS LABS - Scroll-Driven Video Site
+   ============================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg: #0a0a0a;
+  --color-text: #ffffff;
+  --color-text-muted: rgba(255, 255, 255, 0.6);
+  --color-accent: #4f7fff;
+  --color-accent-glow: rgba(79, 127, 255, 0.3);
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html {
+  scroll-behavior: auto; /* We handle scroll ourselves */
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Navigation ---- */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 48px;
+  mix-blend-mode: difference;
+  transition: opacity 0.3s ease;
+}
+
+.nav-logo {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--color-text);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-links a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  transition: opacity 0.3s ease;
+}
+
+.nav-links a:hover {
+  opacity: 0.7;
+}
+
+.nav-cta {
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+}
+
+/* ---- Progress Bar ---- */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+  transition: width 0.1s linear;
+}
+
+/* ---- Video Container ---- */
+.video-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* ---- Scroll Spacer ---- */
+.scroll-spacer {
+  position: relative;
+  z-index: 10;
+  /* Height set dynamically via JS, fallback here */
+  height: 800vh;
+  pointer-events: none;
+}
+
+/* ---- Content Blocks ---- */
+.content-block {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  pointer-events: none;
+}
+
+.content-block.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.content-inner {
+  max-width: 800px;
+  padding: 0 48px;
+}
+
+/* Positioning variants */
+.content-left {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.content-right {
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+.content-center {
+  text-align: center;
+}
+
+/* ---- Typography ---- */
+.section-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 24px;
+}
+
+.content-block h2 {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 600;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.content-block p {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  max-width: 500px;
+}
+
+.content-right p {
+  margin-left: auto;
+}
+
+/* ---- Hero ---- */
+.hero-content {
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+}
+
+.hero-title .line {
+  display: block;
+}
+
+.hero-title .accent {
+  color: var(--color-accent);
+  text-shadow: 0 0 60px var(--color-accent-glow);
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+}
+
+.scroll-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+  animation: bounce 2s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50% { transform: translateY(10px) rotate(45deg); }
+}
+
+/* ---- Stats Grid ---- */
+.stats-grid {
+  display: flex;
+  gap: 80px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: clamp(40px, 5vw, 72px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  color: var(--color-accent);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+
+/* ---- Services ---- */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+.service-item h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.service-item p {
+  font-size: 15px;
+  color: var(--color-text-muted);
+}
+
+/* ---- CTA Section ---- */
+.cta-title {
+  font-size: clamp(36px, 5vw, 72px) !important;
+  letter-spacing: -1px;
+}
+
+.cta-text {
+  font-size: 18px;
+  margin: 0 auto 40px;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 16px 48px;
+  background: var(--color-accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: auto;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px var(--color-accent-glow);
+}
+
+.cta-link {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+}
+
+.cta-link:hover {
+  opacity: 0.7;
+}
+
+/* ---- Footer ---- */
+.footer {
+  position: relative;
+  z-index: 20;
+  background: var(--color-bg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 48px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.footer-brand {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: var(--color-text);
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .nav {
+    padding: 16px 24px;
+  }
+
+  .nav-links {
+    display: none; /* Hamburger menu can be added later */
+  }
+
+  .content-inner {
+    padding: 0 24px;
+  }
+
+  .content-left,
+  .content-right {
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 24px;
+  }
+
+  .content-right p {
+    margin-left: 0;
+  }
+
+  .stats-grid {
+    gap: 40px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
