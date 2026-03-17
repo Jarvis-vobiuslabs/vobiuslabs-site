@@ -12,12 +12,16 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html, body {
+  html {
+    background: #000;
+    height: 100%;
+  }
+  body {
     background: #000;
     color: #fff;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    height: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ── Progress bar ── */
@@ -37,12 +41,16 @@
     inset: 0;
     z-index: 0;
     background: #000;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   #scrollVideo {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   /* ── Dark overlay ── */
@@ -52,6 +60,8 @@
     z-index: 1;
     background: rgba(0,0,0,0.35);
     pointer-events: none;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   /* ── Scroll spacer ── */
@@ -59,7 +69,8 @@
     height: 600vh;
     position: relative;
     z-index: 2;
-    pointer-events: none;
+    /* pointer-events MUST be auto on iOS or touch scroll won't fire */
+    pointer-events: auto;
   }
 
   /* ── Content sections ── */
@@ -70,11 +81,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
+    pointer-events: none !important; /* never block scroll — links use pointer-events:auto inline */
     opacity: 0;
     transition: opacity 0.1s ease;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
-  .scene.visible { pointer-events: auto; }
+  /* Only interactive elements within scenes get pointer events */
+  .scene a, .scene button { pointer-events: auto; }
 
   .scene-inner {
     max-width: 720px;
@@ -227,7 +241,8 @@
 
 <!-- Video background -->
 <div id="video-wrap">
-  <video id="scrollVideo" muted playsinline webkit-playsinline preload="auto">
+  <video id="scrollVideo" muted playsinline webkit-playsinline preload="auto"
+    x-webkit-airplay="allow" style="pointer-events:none">
     <source src="video.mp4" type="video/mp4">
   </video>
 </div>
@@ -358,22 +373,37 @@
     }
   }
 
+  // ── Seek helper (iOS prefers fastSeek) ──────────────────────────────────────
+  function seekTo(t) {
+    try {
+      if (video.fastSeek) {
+        video.fastSeek(t);
+      } else {
+        video.currentTime = t;
+      }
+    } catch (_) {}
+  }
+
   // ── Main update loop ─────────────────────────────────────────────────────────
   function update() {
     ticking = false;
 
-    const scrollTop  = window.scrollY || window.pageYOffset;
-    const maxScroll  = Math.max(spacer.offsetHeight - window.innerHeight, 1);
+    const scrollTop  = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    const maxScroll  = Math.max(
+      document.documentElement.scrollHeight - window.innerHeight,
+      spacer.offsetHeight - window.innerHeight,
+      1
+    );
     const pct        = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
 
     // Progress bar
     progress.style.width = `${pct * 100}%`;
 
-    // Scrub video
+    // Scrub video — always seek, iOS is OK with frequent seeks when preloaded
     if (videoReady && video.duration) {
       const target = pct * video.duration;
-      if (Math.abs(video.currentTime - target) > 0.016) {
-        try { video.currentTime = target; } catch (_) {}
+      if (Math.abs(video.currentTime - target) > 0.008) {
+        seekTo(target);
       }
     }
 
