@@ -347,27 +347,57 @@
 #vl-curtain{position:fixed;inset:0;z-index:99998;pointer-events:none;}
 #vl-curtain .vl-c-top,#vl-curtain .vl-c-bot{
   position:absolute;left:0;right:0;height:50%;background:#0b0b10;
-  transition:transform 0.7s cubic-bezier(0.76,0,0.24,1);
+  transition:transform 0.65s cubic-bezier(0.76,0,0.24,1);
 }
 #vl-curtain .vl-c-top{top:0;transform:translateY(0);}
 #vl-curtain .vl-c-bot{bottom:0;transform:translateY(0);}
 #vl-curtain.vl-open .vl-c-top{transform:translateY(-101%);}
 #vl-curtain.vl-open .vl-c-bot{transform:translateY(101%);}
+#vl-curtain.vl-closing .vl-c-top{transform:translateY(-101%);}
+#vl-curtain.vl-closing .vl-c-bot{transform:translateY(101%);}
+#vl-curtain.vl-closing-end .vl-c-top{transform:translateY(0);}
+#vl-curtain.vl-closing-end .vl-c-bot{transform:translateY(0);}
 </style>
 <div id="vl-curtain"><div class="vl-c-top"></div><div class="vl-c-bot"></div></div>
 <script>
-// Only do entrance animation if coming from home
-var fromHome = document.referrer.indexOf('vobiuslabs.com') > -1 ||
-               location.search.indexOf('from=home') > -1;
-if(fromHome){
-  window.addEventListener('DOMContentLoaded', function(){
-    setTimeout(function(){
-      document.getElementById('vl-curtain').classList.add('vl-open');
-    }, 80);
-  });
-} else {
-  // No entrance animation — just hide curtain immediately
-  document.getElementById('vl-curtain').style.display = 'none';
-}
+(function(){
+  var curtain = document.getElementById('vl-curtain');
+  var fromHome = document.referrer.indexOf('vobiuslabs.com') > -1 &&
+                 document.referrer.indexOf('gallery') === -1 ||
+                 location.search.indexOf('from=home') > -1;
+
+  // Entrance animation (coming from homepage)
+  if(fromHome){
+    window.addEventListener('DOMContentLoaded', function(){
+      setTimeout(function(){ curtain.classList.add('vl-open'); }, 80);
+    });
+  } else {
+    curtain.style.display = 'none';
+  }
+
+  // Back button transition (close curtain, then navigate)
+  function addBackTransitions(){
+    document.querySelectorAll('a[href="/#apps"]').forEach(function(a){
+      if(a._vl) return; a._vl = true;
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        var dest = '/?skip#apps';
+        curtain.style.display = '';
+        // Start open (panels out)
+        curtain.classList.remove('vl-open','vl-closing','vl-closing-end');
+        curtain.classList.add('vl-closing');
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            curtain.classList.remove('vl-closing');
+            curtain.classList.add('vl-closing-end');
+            setTimeout(function(){ window.location.href = dest; }, 680);
+          });
+        });
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', addBackTransitions);
+  setTimeout(addBackTransitions, 500);
+})();
 </script></body>
 </html>
