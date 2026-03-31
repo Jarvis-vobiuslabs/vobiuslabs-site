@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Gallery — Vobius Labs</title>
+  <meta name="description" content="Web designs built by Vobius Labs."/>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <meta name="theme-color" content="#000000"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #000; color: #fff; font-family: 'Inter', -apple-system, sans-serif; min-height: 100vh; }
+
+    /* Nav */
+    .nav {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      z-index: 100; display: flex; align-items: center; gap: 24px;
+      padding: 10px 20px; border-radius: 40px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo-mark {
+      width: 26px; height: 26px; border-radius: 50%; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #000; letter-spacing: -0.5px;
+    }
+    .nav-logo span { font-weight: 700; font-size: 14px; color: #fff; }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-back:hover { color: #fff; }
+
+    /* Hero */
+    .hero {
+      padding: 140px 24px 72px;
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700; letter-spacing: -0.04em; line-height: 1.05;
+      color: #fff; margin-bottom: 18px;
+    }
+    .hero p {
+      font-size: clamp(15px, 2vw, 18px); color: rgba(255,255,255,0.45);
+      line-height: 1.65; max-width: 480px; margin: 0 auto;
+    }
+
+    /* Grid */
+    .grid-section { padding: 0 24px 100px; max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+
+    /* Card */
+    .card {
+      border-radius: 16px; overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      text-decoration: none; display: block;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .card-thumb {
+      width: 100%; aspect-ratio: 16/10;
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a0d2e 50%, #0a0a18 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: rgba(255,255,255,0.2);
+      position: relative; overflow: hidden;
+    }
+    .card-thumb-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .card-info { padding: 18px 20px 20px; }
+    .card-tag {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .card-title { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.55; }
+    .card-footer {
+      padding: 0 20px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-link {
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.35); letter-spacing: 0.04em;
+    }
+    .card:hover .card-link { color: rgba(255,255,255,0.7); }
+
+    /* Coming soon state */
+    .coming-soon {
+      border: 1px dashed rgba(255,255,255,0.1);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 220px; border-radius: 16px;
+      font-size: 13px; color: rgba(255,255,255,0.2);
+      font-weight: 500; letter-spacing: 0.05em;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 28px 24px; text-align: center;
+      font-size: 12px; color: rgba(255,255,255,0.25);
+    }
+    footer a { color: rgba(255,255,255,0.4); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav { gap: 14px; padding: 8px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-mark">VL</div>
+      <span>Vobius Labs</span>
+    </a>
+    <a href="/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="eyebrow">
+      <span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);display:inline-block;"></span>
+      Design Work
+    </div>
+    <h1>Our Gallery</h1>
+    <p>A selection of websites and web designs built by Vobius Labs. More added as we build.</p>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-section">
+    <div class="grid">
+
+      <!-- Card: Pallse -->
+      <a href="https://pallse.com" target="_blank" rel="noopener" class="card">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #07071a 0%, #1a1040 50%, #0d0820 100%);">
+          <div class="card-thumb-placeholder">
+            <div style="width:52px;height:52px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;box-shadow:0 0 40px rgba(99,102,241,0.5);">P</div>
+            <span style="color:rgba(255,255,255,0.3);font-size:13px;">pallse.com</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <div class="card-tag" style="color:#6366f1;">App Landing</div>
+          <div class="card-title">Pallse</div>
+          <div class="card-desc">One question, every day. Anonymous daily poll app landing page with tunnel zoom loader and word-reveal animations.</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-link">pallse.com ↗</span>
+        </div>
+      </a>
+
+      <!-- Card: Voop -->
+      <a href="https://voop.site" target="_blank" rel="noopener" class="card">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #0f0800 0%, #2a1200 50%, #150900 100%);">
+          <div class="card-thumb-placeholder">
+            <div style="width:52px;height:52px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;box-shadow:0 0 40px rgba(249,115,22,0.5);">V</div>
+            <span style="color:rgba(255,255,255,0.3);font-size:13px;">voop.site</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <div class="card-tag" style="color:#f97316;">App Landing</div>
+          <div class="card-title">Voop</div>
+          <div class="card-desc">Habit tracking app landing page. Liquid glass UI, iPad mockup carousel, and heatmap streak visualization.</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-link">voop.site ↗</span>
+        </div>
+      </a>
+
+      <!-- Card: DrinkMore -->
+      <a href="https://drinkmore.app" target="_blank" rel="noopener" class="card">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #00080f 0%, #001a2e 50%, #000d1a 100%);">
+          <div class="card-thumb-placeholder">
+            <div style="width:52px;height:52px;border-radius:50%;background:#38bdf8;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;box-shadow:0 0 40px rgba(56,189,248,0.5);">D</div>
+            <span style="color:rgba(255,255,255,0.3);font-size:13px;">drinkmore.app</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <div class="card-tag" style="color:#38bdf8;">App Landing</div>
+          <div class="card-title">DrinkMore</div>
+          <div class="card-desc">Hydration tracker landing page. Scroll-driven hero video, loading screen, interactive wave AppPreview component.</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-link">drinkmore.app ↗</span>
+        </div>
+      </a>
+
+      <!-- Coming soon slots -->
+      <div class="coming-soon">+ More coming soon</div>
+      <div class="coming-soon">+ More coming soon</div>
+      <div class="coming-soon">+ More coming soon</div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Vobius Labs Inc. &nbsp;·&nbsp; <a href="/">vobiuslabs.com</a></p>
+  </footer>
+
+</body>
+</html>
