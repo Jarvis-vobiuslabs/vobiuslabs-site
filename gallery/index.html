@@ -343,5 +343,31 @@
     <p style="font-size:12px;color:rgba(255,255,255,0.18);">© 2026 <a href="/?skip" style="color:rgba(255,255,255,0.32);text-decoration:none;">Vobius Labs Inc.</a></p>
   </footer>
 
-</body>
+<style>
+#vl-curtain{position:fixed;inset:0;z-index:99998;pointer-events:none;}
+#vl-curtain .vl-c-top,#vl-curtain .vl-c-bot{
+  position:absolute;left:0;right:0;height:50%;background:#0b0b10;
+  transition:transform 0.7s cubic-bezier(0.76,0,0.24,1);
+}
+#vl-curtain .vl-c-top{top:0;transform:translateY(0);}
+#vl-curtain .vl-c-bot{bottom:0;transform:translateY(0);}
+#vl-curtain.vl-open .vl-c-top{transform:translateY(-101%);}
+#vl-curtain.vl-open .vl-c-bot{transform:translateY(101%);}
+</style>
+<div id="vl-curtain"><div class="vl-c-top"></div><div class="vl-c-bot"></div></div>
+<script>
+// Only do entrance animation if coming from home
+var fromHome = document.referrer.indexOf('vobiuslabs.com') > -1 ||
+               location.search.indexOf('from=home') > -1;
+if(fromHome){
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      document.getElementById('vl-curtain').classList.add('vl-open');
+    }, 80);
+  });
+} else {
+  // No entrance animation — just hide curtain immediately
+  document.getElementById('vl-curtain').style.display = 'none';
+}
+</script></body>
 </html>
