@@ -129,10 +129,6 @@
   </nav>
 
   <div class="hero">
-    <div class="eyebrow">
-      <span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3);display:inline-block;"></span>
-      We collaborate, design, and develop applications
-    </div>
     <h1>Our Work</h1>
     <p>Custom websites built by Vobius Labs. Every site is designed from scratch — no templates, no shortcuts.</p>
   </div>
@@ -375,24 +371,14 @@
     curtain.style.display = 'none';
   }
 
-  // Back button transition (close curtain, then navigate)
+  // Back button — skip intro loader and go home
   function addBackTransitions(){
     document.querySelectorAll('a[href="/#apps"]').forEach(function(a){
       if(a._vl) return; a._vl = true;
       a.addEventListener('click', function(e){
         e.preventDefault();
-        var dest = '/?skip#apps';
-        curtain.style.display = '';
-        // Start open (panels out)
-        curtain.classList.remove('vl-open','vl-closing','vl-closing-end');
-        curtain.classList.add('vl-closing');
-        requestAnimationFrame(function(){
-          requestAnimationFrame(function(){
-            curtain.classList.remove('vl-closing');
-            curtain.classList.add('vl-closing-end');
-            setTimeout(function(){ window.location.href = dest; }, 680);
-          });
-        });
+        try{ sessionStorage.setItem('vl_skip','1'); }catch(err){}
+        window.location.href = '/';
       });
     });
   }
