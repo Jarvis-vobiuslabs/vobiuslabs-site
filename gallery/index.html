@@ -120,11 +120,8 @@
       <div class="nav-logo-mark">VL</div>
       <span>Vobius Labs</span>
     </a>
-    <a href="/#apps" class="nav-back">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Back
+    <a href="#contact" class="nav-back">
+      Contact
     </a>
   </nav>
 
@@ -310,7 +307,7 @@
   </div>
 
   <!-- CTA Section -->
-  <div style="padding: 80px 24px 88px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06);">
+  <div id="contact" style="padding: 80px 24px 88px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06);">
     <div style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
       <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);">
         <span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3);display:inline-block;"></span>
@@ -371,19 +368,7 @@
     curtain.style.display = 'none';
   }
 
-  // Back button — skip intro loader and go home
-  function addBackTransitions(){
-    document.querySelectorAll('a[href="/#apps"]').forEach(function(a){
-      if(a._vl) return; a._vl = true;
-      a.addEventListener('click', function(e){
-        e.preventDefault();
-        try{ sessionStorage.setItem('vl_skip','1'); }catch(err){}
-        window.location.href = '/';
-      });
-    });
-  }
-  document.addEventListener('DOMContentLoaded', addBackTransitions);
-  setTimeout(addBackTransitions, 500);
+
 })();
 </script></body>
 </html>
