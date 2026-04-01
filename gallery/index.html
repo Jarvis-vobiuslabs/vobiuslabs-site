@@ -120,7 +120,7 @@
       <div class="nav-logo-mark">VL</div>
       <span>Vobius Labs</span>
     </a>
-    <a href="#contact" class="nav-back">
+    <a href="#contact" class="nav-back" id="nav-contact">
       Contact
     </a>
   </nav>
@@ -370,5 +370,25 @@
 
 
 })();
-</script></body>
+</script><script>
+document.getElementById('nav-contact').addEventListener('click', function(e){
+  e.preventDefault();
+  var target = document.getElementById('contact');
+  var startY = window.scrollY;
+  var endY = target.getBoundingClientRect().top + window.scrollY - 40;
+  var distance = endY - startY;
+  var duration = Math.min(1400, Math.max(900, Math.abs(distance) * 0.6));
+  var startTime = null;
+  function easeInOutQuart(t){ return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t; }
+  function step(ts){
+    if(!startTime) startTime = ts;
+    var elapsed = ts - startTime;
+    var progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, startY + distance * easeInOutQuart(progress));
+    if(progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+</script>
+</body>
 </html>
