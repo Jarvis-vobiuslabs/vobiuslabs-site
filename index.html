@@ -60,25 +60,25 @@
 
   /* hero headline shimmer */
   .vl-heroGlow{display:inline-block;
+    /* Brighter silver + single continuous sweep */
     background:linear-gradient(110deg,
-      rgba(190,190,205,.45) 0%,
-      rgba(255,255,255,.95) 18%,
-      rgba(170,170,190,.40) 36%,
-      rgba(255,255,255,.92) 54%,
-      rgba(185,185,205,.45) 100%);
-    background-size:240% 100%;
+      rgba(210,210,225,.55) 0%,
+      rgba(255,255,255,1) 22%,
+      rgba(170,170,195,.45) 45%,
+      rgba(255,255,255,1) 68%,
+      rgba(210,210,225,.55) 100%);
+    background-size:260% 100%;
     -webkit-background-clip:text;background-clip:text;
     color:transparent;
-    text-shadow:0 0 18px rgba(255,255,255,.10);
-    will-change:background-position,filter;
-    animation:vlShimmer 6.5s ease-in-out infinite;
+    text-shadow:0 0 26px rgba(255,255,255,.16);
+    filter:brightness(1.08);
+    will-change:background-position;
+    animation:vlShimmer 7.5s linear infinite;
   }
-  /* Right-to-left sweep + subtle twinkle at the end */
+  /* One smooth pass (right → left), loop */
   @keyframes vlShimmer{
-    0%   { background-position: 240% 50%; filter:brightness(1); }
-    88%  { background-position:   0% 50%; filter:brightness(1); }
-    94%  { background-position:   0% 50%; filter:brightness(1.12); }
-    100% { background-position:   0% 50%; filter:brightness(1); }
+    0%   { background-position: 260% 50%; }
+    100% { background-position:   0% 50%; }
   }
 
   /* removed stat card per request */
