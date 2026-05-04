@@ -49,7 +49,24 @@
   .vl-proof h2{margin:0 0 10px 0;font-family:Space Grotesk,Inter,system-ui,sans-serif;font-size:clamp(26px,3.2vw,40px);line-height:1.05;}
   .vl-proof .sub{margin:0 0 22px 0;color:rgba(255,255,255,.72);font-size:15px;line-height:1.6;max-width:70ch;}
   .vl-proofGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start;}
-  @media (max-width:900px){.vl-proofGrid{grid-template-columns:1fr;}}
+  @media (max-width:900px){
+    .vl-proofGrid{grid-template-columns:1fr;}
+    .vl-proof{margin-top:46px;}
+    .vl-proof .kicker,.vl-proof h2,.vl-proof .sub{text-align:center;margin-left:auto;margin-right:auto;}
+    .vl-stat{justify-content:center;}
+    .vl-statList li{justify-content:center;}
+    .vl-statList li span:last-child{text-align:center;}
+  }
+
+  /* hero headline shimmer */
+  .vl-heroGlow{display:inline-block;background:linear-gradient(110deg, rgba(220,220,230,.55) 0%, rgba(255,255,255,.95) 20%, rgba(170,170,190,.55) 40%, rgba(255,255,255,.95) 60%, rgba(180,180,200,.55) 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+    text-shadow:0 0 24px rgba(255,255,255,.14);
+    animation:vlShimmer 2.8s linear infinite;
+  }
+  @keyframes vlShimmer{0%{background-position:0% 50%}100%{background-position:220% 50%}}
 
   .vl-statCard{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:16px;padding:16px 16px 14px;}
   .vl-stat{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0 0 8px 0;}
@@ -78,11 +95,25 @@
   function setHeadline(){
     // Best-effort: replace the first H1 we can find (hero headline)
     var h1 = document.querySelector('h1');
-    if(h1 && h1.textContent && h1.textContent.trim().length>0){
-      h1.textContent = 'a new age software studio';
-      return true;
+    if(!h1) return false;
+    var txt = (h1.textContent || '').trim();
+    if(!txt) return false;
+
+    // Proper capitalization + shimmering silver glow sweep
+    h1.innerHTML = '<span class="vl-heroGlow">A New Age Software Studio</span>';
+    return true;
+  }
+
+  function findHeroAnchor(){
+    // We want to insert *under* the animated hero.
+    // Heuristic: use the section/div that contains the first <video> (hero animation).
+    var v = document.querySelector('video');
+    if(v){
+      return v.closest('section') || v.closest('main') || v.closest('div');
     }
-    return false;
+    // fallback: the first h1's nearest section/div
+    var h1 = document.querySelector('h1');
+    return h1 ? (h1.closest('section') || h1.closest('main') || h1.closest('div')) : null;
   }
 
   function injectSection(){
@@ -92,28 +123,27 @@
     el.id = 'vl-proof';
     el.className = 'vl-proof vl-fade';
     el.innerHTML = ''+
-      '<div class="kicker">Design with purpose</div>'+
-      '<h2>Science, math, and non‑AI creative engineers.</h2>'+
-      '<p class="sub">We use measurement, clean systems, and craftsmanship to build software that actually converts. No fluff. No template sameness.</p>'+
+      '<div class="kicker">Built for impact</div>'+
+      '<h2>Design with purpose, engineered to perform.</h2>'+
+      '<p class="sub">We combine science, math, and non‑AI creative engineering to build software that feels premium and moves real numbers.</p>'+
       '<div class="vl-proofGrid">'+
         '<div class="vl-acc">'+
-          '<details open><summary><span class="q">How we work</span><span class="chev">▾</span></summary><div class="a">We use science, math, and non‑AI creative engineers to make design with purpose.</div></details>'+
-          '<details><summary><span class="q">Proof</span><span class="chev">▾</span></summary><div class="a"><strong>Over 500 businesses improved</strong> across local services, ecommerce, and product-led SaaS.</div></details>'+
-          '<details><summary><span class="q">Who we work with</span><span class="chev">▾</span></summary><div class="a">Large scale ecommerce stores, small local businesses, SaaS companies, and more.</div></details>'+
+          '<details open><summary><span class="q">Our approach</span><span class="chev">▾</span></summary><div class="a">Systems-first design: clean structure, deliberate hierarchy, and measurable conversion intent.</div></details>'+
+          '<details><summary><span class="q">Track record</span><span class="chev">▾</span></summary><div class="a"><strong>500+</strong> businesses improved, from local services to high-volume online brands.</div></details>'+
+          '<details><summary><span class="q">Who we build for</span><span class="chev">▾</span></summary><div class="a">Large-scale ecommerce, small local businesses, SaaS companies, and everything in between.</div></details>'+
         '</div>'+
         '<div class="vl-statCard">'+
           '<div class="vl-stat"><div class="num">500+</div><div class="lbl">businesses improved</div></div>'+
           '<ul class="vl-statList">'+
             '<li><span class="vl-dot"></span><span>Mobile-first UX that drives calls, bookings, and purchases.</span></li>'+
-            '<li><span class="vl-dot"></span><span>Clear positioning and structure so visitors instantly “get it”.</span></li>'+
-            '<li><span class="vl-dot"></span><span>Fast, stable builds with real-world conversion intent.</span></li>'+
+            '<li><span class="vl-dot"></span><span>Clear positioning so visitors instantly understand what you do.</span></li>'+
+            '<li><span class="vl-dot"></span><span>Fast, stable builds with high-end polish.</span></li>'+
           '</ul>'+
         '</div>'+
       '</div>';
 
-    // Insert after hero: try closest section to h1, otherwise near top of body.
-    var h1 = document.querySelector('h1');
-    var anchor = h1 ? (h1.closest('section') || h1.closest('div')) : null;
+    // Insert UNDER the animated hero.
+    var anchor = findHeroAnchor();
     if(anchor && anchor.parentNode){
       anchor.parentNode.insertBefore(el, anchor.nextSibling);
     } else {
