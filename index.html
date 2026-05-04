@@ -68,13 +68,7 @@
   }
   @keyframes vlShimmer{0%{background-position:0% 50%}100%{background-position:220% 50%}}
 
-  .vl-statCard{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:16px;padding:16px 16px 14px;}
-  .vl-stat{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0 0 8px 0;}
-  .vl-stat .num{font-family:Space Grotesk,Inter,sans-serif;font-weight:600;font-size:28px;letter-spacing:-.02em;}
-  .vl-stat .lbl{color:rgba(255,255,255,.68);font-size:13px;}
-  .vl-statList{margin:10px 0 0 0;padding:0;list-style:none;display:grid;gap:10px;}
-  .vl-statList li{display:flex;gap:10px;align-items:flex-start;color:rgba(255,255,255,.78);font-size:13px;line-height:1.5;}
-  .vl-dot{width:10px;height:10px;border-radius:999px;background:rgba(124,58,237,.9);margin-top:5px;box-shadow:0 0 0 6px rgba(124,58,237,.12);flex:0 0 auto;}
+  /* removed stat card per request */
 
   .vl-acc{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:16px;overflow:hidden;}
   .vl-acc details{border-top:1px solid rgba(255,255,255,.10);}
@@ -104,16 +98,42 @@
     return true;
   }
 
+  function _isInLoaderOverlay(el){
+    if(!el) return false;
+    // Loader overlay in this export is a fixed div with z-index:9999
+    var p = el;
+    while(p && p !== document.body){
+      if(p.style && (p.style.zIndex === '9999') && (p.style.position === 'fixed')) return true;
+      p = p.parentElement;
+    }
+    return false;
+  }
+
   function findHeroAnchor(){
-    // We want to insert *under* the animated hero.
-    // Heuristic: use the section/div that contains the first <video> (hero animation).
+    // We want to insert UNDER the animated hero (not in the initial loader overlay).
+
+    // 1) Prefer a <video> (hero animation) once React hydrates
     var v = document.querySelector('video');
-    if(v){
+    if(v && !_isInLoaderOverlay(v)){
       return v.closest('section') || v.closest('main') || v.closest('div');
     }
-    // fallback: the first h1's nearest section/div
+
+    // 2) Otherwise, try the last canvas that is NOT the loader canvas
+    var canv = Array.prototype.slice.call(document.querySelectorAll('canvas'));
+    for(var i=canv.length-1;i>=0;i--){
+      var c = canv[i];
+      if(c && !_isInLoaderOverlay(c)){
+        return c.closest('section') || c.closest('main') || c.closest('div');
+      }
+    }
+
+    // 3) fallback: the first h1's nearest section/div (but avoid overlay)
     var h1 = document.querySelector('h1');
-    return h1 ? (h1.closest('section') || h1.closest('main') || h1.closest('div')) : null;
+    if(h1 && !_isInLoaderOverlay(h1)){
+      return h1.closest('section') || h1.closest('main') || h1.closest('div');
+    }
+
+    return null;
   }
 
   function injectSection(){
@@ -132,23 +152,14 @@
           '<details><summary><span class="q">Track record</span><span class="chev">▾</span></summary><div class="a"><strong>500+</strong> businesses improved, from local services to high-volume online brands.</div></details>'+
           '<details><summary><span class="q">Who we build for</span><span class="chev">▾</span></summary><div class="a">Large-scale ecommerce, small local businesses, SaaS companies, and everything in between.</div></details>'+
         '</div>'+
-        '<div class="vl-statCard">'+
-          '<div class="vl-stat"><div class="num">500+</div><div class="lbl">businesses improved</div></div>'+
-          '<ul class="vl-statList">'+
-            '<li><span class="vl-dot"></span><span>Mobile-first UX that drives calls, bookings, and purchases.</span></li>'+
-            '<li><span class="vl-dot"></span><span>Clear positioning so visitors instantly understand what you do.</span></li>'+
-            '<li><span class="vl-dot"></span><span>Fast, stable builds with high-end polish.</span></li>'+
-          '</ul>'+
-        '</div>'+
       '</div>';
 
     // Insert UNDER the animated hero.
     var anchor = findHeroAnchor();
-    if(anchor && anchor.parentNode){
-      anchor.parentNode.insertBefore(el, anchor.nextSibling);
-    } else {
-      document.body.appendChild(el);
-    }
+    // If hero isn't mounted yet, don't insert early (prevents appearing above hero)
+    if(!anchor || !anchor.parentNode) return false;
+
+    anchor.parentNode.insertBefore(el, anchor.nextSibling);
 
     // Fade-in
     try{
